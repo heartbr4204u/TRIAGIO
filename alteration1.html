@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Triagio - AI Support Ticket System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg-main: #0b1330;
+  --bg-accent: #1e276f;
+  --bg-card: #fff;
+  --font-main: #fff;
+  --font-headline: gold;
+  --btn-main: gold;
+  --btn-main-text: #111b53;
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: gold;
+  --btn-secondary-color: gold;
+  --table-th-bg: #111b53;
+  --input-bg: rgba(255,255,255,0.15);
+  --input-color: #fff;
+  --chat-customer: rgba(50,205,50,0.9);
+  --chat-agent: rgba(255,215,0,0.9);
+}
+body.light-theme {
+  --bg-main: #f6f6fb;
+  --bg-accent: #e7e7f6;
+  --bg-card: #fff;
+  --font-main: #222;
+  --font-headline: #ccac00;
+  --btn-main: #ffd700;
+  --btn-main-text: #222;
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: #ccac00;
+  --btn-secondary-color: #ccac00;
+  --table-th-bg: #fff2cc;
+  --input-bg: #fff;
+  --input-color: #222;
+  --chat-customer: #caffd7;
+  --chat-agent: #fff2ac;
+}
+body { margin: 0; font-family: 'Poppins', sans-serif; background: linear-gradient(135deg,var(--bg-main),var(--bg-accent)); color: var(--font-main); overflow-x: hidden; }
+a { color: var(--font-headline); text-decoration: none; cursor: pointer; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font-family: 'Poppins', sans-serif; }
+button {
+  background: var(--btn-main);
+  color: var(--btn-main-text);
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 5px 10px 0 0;
+  box-shadow: 0 3px 10px #d4af3720;
+  transition: background 0.3s ease;
+}
+button:hover { background: #ffd700c4; }
+button.secondary {
+  background: var(--btn-secondary-bg);
+  border: 2px solid var(--btn-secondary-border);
+  color: var(--btn-secondary-color);
+}
+button.secondary:hover {
+  background: var(--btn-main);
+  color: var(--btn-main-text);
+}
+input, select, textarea {
+  padding: 10px 14px;
+  margin: 10px 0 20px 0;
+  border-radius: 12px;
+  border: none;
+  font-size: 1.1rem;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--input-color);
+  font-weight: 500;
+  resize: vertical;
+  transition: background 0.3s ease;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #d4af37b0;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  background: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+#header {
+  background: linear-gradient(90deg, #111b53, #2a387a);
+  user-select: none;
+  text-align: center;
+  padding: 4rem 1rem;
+  position: relative;
+}
+#header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 4rem;
+  color: var(--font-headline);
+  letter-spacing: 5px;
+  margin: 0;
+  font-weight: 900;
+  animation: fadeInBounce 2s ease forwards;
+}
+#header h1 .bigT {
+  font-size: 6rem;
+  display: inline-block;
+  position: relative;
+  top: 10px;
+  animation: bounce 2s infinite alternate;
+}
+@keyframes bounce {
+  0% {
+    top: 10px;
+    color: var(--font-headline);
+  }
+  100% {
+    top: 0;
+    color: #ffd700;
+  }
+}
+@keyframes fadeInBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+main {
+  max-width: 600px;
+  margin: 20px auto 70px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 40px #000933cc;
+}
+main > section {
+  display: none;
+}
+main > section.active {
+  display: block;
+  animation: fadeIn 0.8s ease forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+#topright {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  color: var(--font-headline);
+  font-weight: 700;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+#settingsModal {
+  display: none;
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 0 40px gold;
+  z-index: 1000;
+  color: var(--font-headline);
+}
+#settingsModal.open {
+  display: block;
+}
+#settingsModal h3 {
+  margin-top: 0;
+  font-family: 'Cinzel', serif;
+}
+#settingsModal label {
+  margin: 10px 0 5px;
+  font-weight: 600;
+}
+#settingsModal input,
+#settingsModal select {
+  width: 100%;
+  margin-bottom: 15px;
+}
+#settingsModal button {
+  width: 100%;
+  margin-top: 5px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  border-bottom: 1.5px solid gold;
+  padding: 14px 12px;
+  font-weight: 600;
+  color: var(--font-main);
+}
+th {
+  background: var(--table-th-bg);
+}
+tr:hover {
+  background: rgba(255, 215, 0, 0.13);
+}
+.status-open {
+  color: orange;
+  font-weight: 700;
+}
+.status-in-progress {
+  color: #00ffff;
+  font-weight: 700;
+}
+.status-resolved {
+  color: #32cd32;
+  font-weight: 700;
+}
+.tracker {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0 35px;
+  position: relative;
+}
+.tracker::after {
+  content: '';
+  position: absolute;
+  height: 6px;
+  width: 100%;
+  background: #0b1330;
+  top: 20px;
+  left: 0;
+  border-radius: 20px;
+  z-index: 0;
+}
+.tracker-step {
+  position: relative;
+  text-align: center;
+  width: 25%;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  z-index: 10;
+}
+.tracker-step.active {
+  color: #32cd32;
+}
+.tracker-step .circle {
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  line-height: 36px;
+  background: rgba(50, 205, 50, 0.8);
+  color: #0b1330;
+  margin-bottom: 4px;
+  font-weight: 900;
+}
+.chat {
+  background: rgba(0, 0, 0, 0.25);
+  max-height: 250px;
+  overflow-y: auto;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+.chat-msg {
+  background: var(--chat-customer);
+  border-radius: 16px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  max-width: 75%;
+  color: #0b1330;
+  font-weight: 600;
+}
+.chat-msg.agent {
+  background: var(--chat-agent);
+  color: #111b53;
+  margin-left: auto;
+}
+.chat-msg.customer {
+  background: var(--chat-customer);
+  color: #0b1330;
+  margin-right: auto;
+}
+.stars {
+  font-size: 2.3rem;
+  margin: 12px 0 18px;
+  cursor: pointer;
+}
+.stars span {
+  color: #444;
+  transition: color 0.3s;
+}
+.stars span.selected,
+.stars span:hover,
+.stars span:hover ~ span {
+  color: var(--btn-main);
+}
+@media (max-width: 600px) {
+  main {
+    width: 95%;
+    padding: 15px 20px;
+  }
+  #header h1 {
+    font-size: 3rem;
+  }
+  #header h1 .bigT {
+    font-size: 4.5rem;
+  }
+}
+</style>
+</head>
+<body>
+<header id="header" aria-label="Triagio Logo and Title">
+  <h1 aria-label="Triagio logo"><span class="bigT">T</span>riagio</h1>
+</header>
+<div id="topright">
+  <select id="languageSelector" aria-label="Language selector" title="Select Language">
+    <option value="en" selected>English</option>
+    <option value="hi">Hindi</option>
+    <option value="es">Español</option>
+    <option value="fr">Français</option>
+    <option value="zh">中文</option>
+  </select>
+  <button id="settingsToggle" aria-label="Open Settings" title="Settings">⚙</button>
+</div>
+<div id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" tabindex="-1">
+  <h3 id="settingsTitle">Settings</h3>
+  <label for="changePassword">Change Password</label>
+  <input type="password" id="changePassword" placeholder="New Password" autocomplete="new-password" />
+  <label for="updateEmail">Update Email</label>
+  <input type="email" id="updateEmail" placeholder="Email" />
+  <label for="toggleTheme">Toggle Dark / Light Mode 🌙☀️</label>
+  <select id="toggleTheme">
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+  </select>
+  <label for="notifPref">Notification Preferences</label>
+  <select id="notifPref">
+    <option value="all">All Notifications</option>
+    <option value="important">Important Only</option>
+    <option value="none">None</option>
+  </select>
+  <button class="btn" id="saveSettingsBtn">Save Changes</button>
+</div>
+<main>
+  <section id="signup" aria-label="Sign up page" class="active">
+    <h2>Sign Up</h2>
+    <form id="signupForm" aria-describedby="signupInfo">
+      <label for="fullname">Full Name</label>
+      <input id="fullname" name="fullname" type="text" required autofocus />
+      <label for="signupEmail">Email</label>
+      <input id="signupEmail" name="email" type="email" required />
+      <label for="signupPassword">Password</label>
+      <input id="signupPassword" name="password" type="password" required />
+      <label for="phoneNumber">Phone Number</label>
+      <input id="phoneNumber" name="phone" type="tel" required pattern="[0-9]{10}" placeholder="10 digit number" />
+      <button type="submit" class="btn">Sign Up</button>
+    </form>
+    <p id="signupInfo" style="color: gold; margin-top: 12px;">Already have an account? <a onclick="showPage('login')">Login here</a>.</p>
+  </section>
+  <section id="login" aria-label="Login page">
+    <h2>Login</h2>
+    <p>Select Role</p>
+    <div>
+      <button class="btn" onclick="selectRole('customer')">Customer</button>
+      <button class="btn" onclick="selectRole('agent')">Agent</button>
+      <button class="btn" onclick="selectRole('admin')">Admin</button>
+    </div>
+    <form id="loginForm" aria-labelledby="loginRoleLabel" style="margin-top: 20px; display: none;">
+      <h3 id="loginRoleLabel"></h3>
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" required />
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password" required />
+      <a href="#" onclick="alert('Reset password link sent!')" style="display: block; margin: 6px 0; color: gold;">Forgot Password?</a>
+      <button type="submit" class="btn">Login</button>
+    </form>
+  </section>
+  <section id="customerDashboard" aria-label="Customer Dashboard">
+    <h2>Welcome, Customer!</h2>
+    <button class="btn" onclick="showPage('createTicket')">Create New Ticket</button>
+    <h3>Your Tickets</h3>
+    <table aria-label="List of your support tickets">
+      <thead>
+        <tr><th>Ticket ID</th><th>Issue</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="customerTicketsList"></tbody>
+    </table>
+    <div class="nav-btns">
+      <button class="btn secondary" onclick="showPage('login')">Logout</button>
+      <button class="btn" onclick="showPage('feedback')">Next</button>
+    </div>
+  </section>
+  <section id="createTicket" aria-label="Create ticket page">
+    <h2>Create New Ticket</h2>
+    <form id="createTicketForm">
+      <label for="ticketName">Name</label>
+      <input id="ticketName" readonly />
+      <label for="ticketEmail">Email</label>
+      <input id="ticketEmail" type="email" readonly />
+      <label for="ticketDescription">Issue Description</label>
+      <textarea id="ticketDescription" rows="5" required placeholder="Describe your issue"></textarea>
+      <label for="ticketAttachment">Attachment (optional)</label>
+      <input id="ticketAttachment" type="file" accept="image/*" />
+      <div class="nav-btns">
+        <button type="button" class="btn secondary" onclick="showPage('customerDashboard')">Previous</button>
+        <button type="submit" class="btn">Submit Ticket</button>
+      </div>
+    </form>
+  </section>
+  <section id="ticketDetails" aria-label="Ticket details page">
+    <h2>Ticket Details</h2>
+    <div class="tracker" aria-label="Ticket progress tracker" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="1">
+      <div class="tracker-step active" id="stepCreated"><span class="circle">1</span><br>Created</div>
+      <div class="tracker-step" id="stepAssigned"><span class="circle">2</span><br>Assigned</div>
+      <div class="tracker-step" id="stepResolving"><span class="circle">3</span><br>Resolving</div>
+      <div class="tracker-step" id="stepResolved"><span class="circle">4</span><br>Resolved</div>
+    </div>
+    <div class="card" style="background: var(--bg-card); color: #111b53; padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+      <p><b>Ticket ID: </b><span id="detTicketId"></span></p>
+      <p><b>Category: </b><span id="detCategory"></span></p>
+      <p><b>Team: </b><span id="detTeam"></span></p>
+      <p><b>Date: </b><span id="detDate"></span></p>
+      <p><b>Status: </b><span id="detStatus"></span></p>
+      <p><b>Assigned Agent: </b><span id="detAgent"></span></p>
+    </div>
+    <div class="chat" role="log" aria-live="polite" aria-atomic="true" aria-relevant="additions" id="chatBox"></div>
+    <form id="commentForm" aria-label="Add comment form">
+      <textarea id="commentInput" rows="3" placeholder="Add Comment..." required></textarea>
+      <div class="nav-btns">
+        <button type="button" class="btn secondary" onclick="showPage('createTicket')">Previous</button>
+        <button type="submit" class="btn">Send</button>
+        <button type="button" class="btn" onclick="showPage('feedback')">Next</button>
+      </div>
+    </form>
+  </section>
+  <section id="feedback" aria-label="Feedback page">
+    <h2>Rate Your Experience</h2>
+    <p>How was your experience?</p>
+    <div class="stars" role="radiogroup" aria-live="polite" aria-atomic="true" aria-labelledby="feedbackLabel">
+      <span tabindex="0" role="radio" aria-checked="false" aria-label="1 star" data-value="1">☆</span>
+      <span tabindex="0" role="radio" aria-checked="false" aria-label="2 stars" data-value="2">☆</span>
+      <span tabindex="0" role="radio" aria-checked="false" aria-label="3 stars" data-value="3">☆</span>
+      <span tabindex="0" role="radio" aria-checked="false" aria-label="4 stars" data-value="4">☆</span>
+      <span tabindex="0" role="radio" aria-checked="false" aria-label="5 stars" data-value="5">☆</span>
+    </div>
+    <label id="feedbackLabel" for="feedbackComment">What can we improve?</label>
+    <textarea id="feedbackComment" rows="4" placeholder="Write your feedback here..."></textarea>
+    <div class="nav-btns">
+      <button type="button" class="btn secondary" onclick="showPage('ticketDetails')">Previous</button>
+      <button id="submitFeedbackBtn" class="btn">Submit Feedback</button>
+      <button type="button" class="btn secondary" onclick="showPage('customerDashboard')">Return Home</button>
+    </div>
+  </section>
+  <section id="agentDashboard" aria-label="Agent Dashboard">
+    <h2>Agent Dashboard</h2>
+    <div>
+      <label for="agentFilterPriority">Filter by Priority:</label>
+      <select id="agentFilterPriority" onchange="refreshAgentTickets()">
+        <option value="">All</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+      <label for="agentFilterStatus">Filter by Status:</label>
+      <select id="agentFilterStatus" onchange="refreshAgentTickets()">
+        <option value="">All</option>
+        <option value="Open">Open</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+      <label for="agentFilterCategory">Filter by Category:</label>
+      <select id="agentFilterCategory" onchange="refreshAgentTickets()">
+        <option value="">All</option>
+        <option value="Billing">Billing</option>
+        <option value="Technical">Technical</option>
+        <option value="Delivery">Delivery</option>
+      </select>
+    </div>
+    <table aria-label="Tickets assigned to agent">
+      <thead>
+        <tr><th>Ticket ID</th><th>Issue</th><th>Priority</th><th>Status</th><th>Department</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="agentTicketsList"></tbody>
+    </table>
+    <div class="nav-btns">
+      <button class="btn secondary" onclick="showPage('login')">Logout</button>
+    </div>
+  </section>
+  <section id="adminDashboard" aria-label="Admin Dashboard">
+    <h2>Admin Dashboard</h2>
+    <div class="stats" role="region" aria-label="Ticket counts">
+      <div class="stat-box" aria-live="polite" aria-atomic="true">Open Tickets: <b id="openCount">0</b></div>
+      <div class="stat-box" aria-live="polite" aria-atomic="true">Closed Tickets: <b id="closedCount">0</b></div>
+      <div class="stat-box" aria-live="polite" aria-atomic="true">Overdue Tickets: <b id="overdueCount">0</b></div>
+    </div>
+    <div>
+      <h3>Assign Agents to Tickets (AI-based assignment simulated)</h3>
+      <button class="btn" onclick="assignAgentsToTickets()">Assign Agents Now</button>
+    </div>
+    <div>
+      <h3>Analytics 📊</h3>
+      <img id="analyticsChart" alt="Ticket category analytics chart" src="https://quickchart.io/chart?c={type:'pie',data:{labels:['Billing','Technical','Delivery'],datasets:[{data:[14,7,9]}]}}" height="230" style="border-radius:15px; box-shadow: 0 0 15px gold;">
+    </div>
+    <div>
+      <h3>Manage Users (Add/Remove Agents)</h3>
+      <input id="newAgentName" placeholder="New Agent Full Name" />
+      <button class="btn" onclick="addAgent()">Add Agent</button>
+      <select id="agentToRemove" style="margin-top: 12px; width: 100%; padding: 10px; border-radius: 12px; color: #222;"></select>
+      <button class="btn secondary" onclick="removeAgent()">Remove Selected Agent</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn secondary" onclick="showPage('login')">Logout</button>
+    </div>
+  </section>
+</main>
+<script>
+
+function assignDepartmentToTicket(ticket) {
+  const desc = ticket.issue.toLowerCase();
+
+  // 1. Billing / Accounts
+  const billingPhrases = [
+    "payment failed", "transaction declined", "refund not received",
+    "invoice not generated", "wrong amount charged", "subscription renewal issue",
+    "credit not applied", "billing address change"
+  ];
+  for (const phrase of billingPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Billing';
+      ticket.team = 'Accounts Department';
+      return;
+    }
+  }
+
+  // 2. Technical Support / IT
+  const techPhrases = [
+    "app not loading", "app crashing", "unable to log in", "forgot password",
+    "error messages", "system running slow", "feature not working","login issue",
+    "network issue", "connectivity issue", "software installation", "update problem"
+  ];
+  for (const phrase of techPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Technical';
+      ticket.team = 'IT Department';
+      return;
+    }
+  }
+
+  // 3. Delivery / Logistics
+  const deliveryPhrases = [
+    "package not delivered", "order delayed", "order missing",
+    "wrong item received", "tracking number not updating", "return request",
+    "replacement request", "courier damaged"
+  ];
+  for (const phrase of deliveryPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Delivery';
+      ticket.team = 'Logistics Department';
+      return;
+    }
+  }
+
+  // 4. Customer Support / Helpdesk / General
+  const generalPhrases = [
+    "how to use", "change personal details", "update email", "update phone",
+    "feedback", "suggestion", "complaint", "follow-up", "existing requests",
+    "account closure"
+  ];
+  for (const phrase of generalPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Customer Support';
+      ticket.team = 'Helpdesk';
+      return;
+    }
+  }
+
+  // 5. Human Resources (HR)
+  const hrPhrases = [
+    "leave application", "salary query", "payslip query", "attendance discrepancy",
+    "employee portal", "policy clarification", "hr login issue"
+  ];
+  for (const phrase of hrPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'HR';
+      ticket.team = 'Human Resources';
+      return;
+    }
+  }
+
+  // 6. Sales / Marketing
+  const salesPhrases = [
+    "product inquiry", "plan inquiry", "discount request", "offer request",
+    "custom quote", "pricing issue", "partner query", "reseller query",
+    "promotional campaign"
+  ];
+  for (const phrase of salesPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Sales/Marketing';
+      ticket.team = 'Sales & Marketing';
+      return;
+    }
+  }
+
+  // 7. Security & Compliance
+  const securityPhrases = [
+    "account hacked", "unauthorized access", "privacy request", "data request",
+    "policy violation", "system breach", "security alert"
+  ];
+  for (const phrase of securityPhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Security';
+      ticket.team = 'Security & Compliance';
+      return;
+    }
+  }
+
+  // 8. Maintenance / Operations
+  const maintenancePhrases = [
+    "device malfunction", "equipment malfunction", "hardware repair",
+    "office maintenance", "utility issue", "system setup", "relocation help"
+  ];
+  for (const phrase of maintenancePhrases) {
+    if (desc.includes(phrase)) {
+      ticket.category = 'Maintenance';
+      ticket.team = 'Operations';
+      return;
+    }
+  }
+
+  // Default fallback if nothing matches
+  ticket.category = 'General';
+  ticket.team = 'General Support';
+}
+const users = {
+  customers: [],
+  agents: [{ name: "Alex Brown" }, { name: "Sara Smith" }],
+  tickets: [],
+};
+
+let currentUserRole = null;
+let currentUser = null;
+let currentTicket = null;
+let starRating = 0;
+
+function showPage(id) {
+  document.querySelectorAll("main > section").forEach((s) =>
+    s.classList.remove("active")
+  );
+  document.getElementById(id).classList.add("active");
+  closeSettings();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function selectRole(role) {
+  currentUserRole = role;
+  document.getElementById(
+    "loginRoleLabel"
+  ).textContent = role.charAt(0).toUpperCase() + role.slice(1) + " Login";
+  document.getElementById("loginForm").style.display = "block";
+}
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+document.getElementById("signupForm").onsubmit = function (e) {
+  e.preventDefault();
+  const fullname = document.getElementById("fullname").value.trim();
+  const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+  const password = document.getElementById("signupPassword").value;
+  const phone = document.getElementById("phoneNumber").value.trim();
+  if (
+    !fullname.length ||
+    !isValidEmail(email) ||
+    password.length < 6 ||
+    !phone.match(/^\d{10}$/)
+  ) {
+    alert("Please fill in valid details.");
+    return;
+  }
+  users.customers.push({ fullname, email, password, phone });
+  alert("Signed up successfully! Please login.");
+  showPage("login");
+};
+document.getElementById("loginForm").onsubmit = function (e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password = document.getElementById("loginPassword").value;
+  if (!isValidEmail(email)) {
+    alert("Please enter a valid email.");
+    return;
+  }
+  if (currentUserRole === "customer") {
+    const user = users.customers.find(
+      (c) => c.email === email && c.password === password
+    );
+    if (user) {
+      currentUser = user;
+      populateCustomerDashboard();
+      showPage("customerDashboard");
+    } else {
+      alert("Invalid login");
+    }
+  } else if (currentUserRole === "agent") {
+    if (email.includes("@") && email.endsWith(".org") && password === "agent123") {
+      currentUser = { name: "Agent User", email };
+      populateAgentTickets();
+      showPage("agentDashboard");
+    } else {
+      alert("Invalid login: Agent email must end with .org and password is agent123");
+    }
+  } else if (currentUserRole === "admin") {
+    if (email.includes("@") && email.endsWith("@triagio.com") && password === "admin123") {
+      currentUser = { name: "Admin User" };
+      populateAdminDashboard();
+      showPage("adminDashboard");
+    } else {
+      alert("Invalid login: Admin email must end with @triagio.com and password is admin123");
+    }
+  }
+};
+function populateCustomerDashboard() {
+  const tbody = document.getElementById("customerTicketsList");
+  tbody.innerHTML = "";
+  const custTickets = users.tickets.filter(
+    (t) => t.customerEmail === currentUser.email
+  );
+  custTickets.forEach((t) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${t.id}</td><td>${t.issue}</td><td class="status-${t.status
+      .toLowerCase()
+      .replace(/ /g, "-")}">${t.status}</td><td><button class="btn secondary" onclick="viewTicket('${t.id
+      }')">View</button></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("ticketName").value = currentUser.fullname;
+  document.getElementById("ticketEmail").value = currentUser.email;
+}
+document.getElementById("createTicketForm").onsubmit = function (e) {
+  e.preventDefault();
+  const desc = document.getElementById("ticketDescription").value.trim();
+  if (!desc) {
+    alert("Please describe your issue.");
+    return;
+  }
+  const newTicket = {
+    id: Math.floor(1000 + Math.random() * 9000).toString(),
+    issue: desc.length > 20 ? desc.substring(0, 20) + "..." : desc,
+    status: "Open",
+    category: "General",
+    assignedAgent: null,
+    priority: "Medium",
+    date: new Date().toLocaleDateString(),
+    chat: [{ sender: "customer", msg: desc }],
+    customerEmail: currentUser.email,
+  };
+  assignDepartmentToTicket(newTicket);
+  users.tickets.push(newTicket);
+  alert("Your ticket has been submitted!");
+  populateCustomerDashboard();
+  currentTicket = newTicket;
+  renderTicketDetails(newTicket);
+  showPage("ticketDetails");
+};
+function viewTicket(id) {
+  const t = users.tickets.find((tt) => tt.id === id);
+  if (!t) return alert("Ticket not found.");
+  currentTicket = t;
+  renderTicketDetails(t);
+  showPage("ticketDetails");
+}
+function renderTicketDetails(ticket) {
+  document.getElementById("detTicketId").textContent = ticket.id;
+  document.getElementById("detCategory").textContent = ticket.category;
+  document.getElementById("detTeam").textContent = ticket.team || "Unassigned";
+  document.getElementById("detDate").textContent = ticket.date;
+  document.getElementById("detStatus").textContent = ticket.status;
+  document.getElementById("detAgent").textContent = ticket.assignedAgent || "Unassigned";
+  const ma = { Open: 1, "In Progress": 2, Resolving: 3, Resolved: 4 };
+  const progress = ma[ticket.status] || 1;
+  document.querySelectorAll(".tracker-step").forEach((step, i) => {
+    step.classList.toggle("active", i < progress);
+  });
+  const chatBox = document.getElementById("chatBox");
+  chatBox.innerHTML = "";
+  ticket.chat.forEach((c) => {
+    const div = document.createElement("div");
+    div.classList.add("chat-msg");
+    div.classList.add(c.sender === "agent" ? "agent" : "customer");
+    div.textContent = c.msg;
+    chatBox.appendChild(div);
+  });
+}
+document.getElementById("commentForm").onsubmit = function (e) {
+  e.preventDefault();
+  const text = document.getElementById("commentInput").value.trim();
+  if (!text) return;
+  currentTicket.chat.push({ sender: currentUserRole === "agent" ? "agent" : "customer", msg: text });
+  renderTicketDetails(currentTicket);
+  document.getElementById("commentInput").value = "";
+  alert("Submitted!");
+};
+// Feedback star rating
+const stars = document.querySelectorAll(".stars span");
+stars.forEach((star) => {
+  star.addEventListener("click", function () {
+    starRating = +this.getAttribute("data-value");
+    updateStarColors(starRating);
+    this.setAttribute("aria-checked", "true");
+  });
+  star.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      star.click();
+    }
+  });
+});
+function updateStarColors(r) {
+  stars.forEach((star) => {
+    const val = +star.getAttribute("data-value");
+    star.classList.toggle("selected", val <= r);
+    star.setAttribute("aria-checked", val <= r);
+  });
+}
+document.getElementById("submitFeedbackBtn").onclick = function () {
+  if (starRating === 0) {
+    alert("Please select a star rating.");
+    return;
+  }
+  alert("Feedback successfully submitted! Thank You.");
+  showPage("customerDashboard");
+};
+// Agent dashboard population
+function refreshAgentTickets() {
+  populateAgentTickets();
+}
+function populateAgentTickets() {
+  const tbody = document.getElementById("agentTicketsList");
+  tbody.innerHTML = "";
+  users.tickets.forEach((t) => {
+    const tr = document.createElement("tr");
+    const disabledAttr = t.status === "Resolved" ? "disabled style='background-color: limegreen'" : "";
+    tr.innerHTML = `<td>${t.id}</td><td>${t.issue}</td><td>${t.priority}</td><td>${t.status}</td><td>${t.category}</td><td>
+    <button class="btn secondary" onclick="markResolved('${t.id}', this)" ${disabledAttr}>Mark Resolved</button>
+    <button class="btn secondary" onclick="escalateTicket('${t.id}')">Escalate</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function markResolved(id, btn) {
+  const ticket = users.tickets.find((t) => t.id === id);
+  if (!ticket) {
+    alert(`Ticket ${id} not found.`);
+    return;
+  }
+  ticket.status = "Resolved";
+  btn.disabled = true;
+  btn.style.backgroundColor = "limegreen";
+  alert(`Ticket ${id} marked resolved.`);
+  populateAgentTickets();
+}
+function escalateTicket(id) {
+  alert(`Ticket ${id} escalated.`);
+}
+function assignAgentsToTickets() {
+  users.tickets.forEach((t, i) => {
+    if (!t.assignedAgent) {
+      t.assignedAgent = users.agents[i % users.agents.length].name;
+    }
+  });
+  alert("Agents assigned to tickets by AI!");
+}
+function populateAdminDashboard() {
+  document.getElementById("openCount").textContent = users.tickets.filter(
+    (t) => t.status === "Open"
+  ).length;
+  document.getElementById("closedCount").textContent = users.tickets.filter(
+    (t) => t.status === "Resolved"
+  ).length;
+  document.getElementById("overdueCount").textContent = 2;
+  populateAgentDropdown();
+}
+function populateAgentDropdown() {
+  const sel = document.getElementById("agentToRemove");
+  sel.innerHTML = "";
+  users.agents.forEach((a, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = a.name;
+    sel.appendChild(opt);
+  });
+}
+function addAgent() {
+  const name = document.getElementById("newAgentName").value.trim();
+  if (!name) {
+    alert("Enter a name.");
+    return;
+  }
+  users.agents.push({ name });
+  alert("Agent added.");
+  populateAgentDropdown();
+  document.getElementById("newAgentName").value = "";
+}
+function removeAgent() {
+  const sel = document.getElementById("agentToRemove");
+  if (sel.value === "") {
+    alert("Select agent to remove.");
+    return;
+  }
+  users.agents.splice(sel.value, 1);
+  alert("Agent removed.");
+  populateAgentDropdown();
+}
+const settingsToggle = document.getElementById("settingsToggle");
+const settingsModal = document.getElementById("settingsModal");
+settingsToggle.addEventListener("click", () => {
+  settingsModal.classList.toggle("open");
+});
+document.getElementById("saveSettingsBtn").addEventListener("click", () => {
+  settingsModal.classList.remove("open");
+  alert("Changes are saved");
+});
+document.getElementById("toggleTheme").addEventListener("change", function () {
+  setTheme(this.value);
+});
+function setTheme(theme) {
+  if (theme === "light") {
+    document.body.classList.add("light-theme");
+  } else {
+    document.body.classList.remove("light-theme");
+  }
+}
+setTheme("dark");
+document.getElementById("languageSelector").addEventListener("change", (e) => {
+  alert(
+    "Language changed to " +
+      e.target.options[e.target.selectedIndex].text +
+      ". (Translation not implemented)"
+  );
+});
+function closeSettings() {
+  settingsModal.classList.remove("open");
+}
+showPage("signup");
+</script>
+</body>
+</html>
