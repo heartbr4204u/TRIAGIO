@@ -771,15 +771,16 @@ document.getElementById("createTicketForm").onsubmit = function (e) {
   };
   assignDepartmentToTicket(newTicket);
   users.tickets.push(newTicket);
-  fetch('https://script.google.com/macros/s/AKfycbzhXp2RiJJJ0fflyDTvvv1fLpMxD7xkKimihoafTprpCtzdN7M0cjRxfyn2jUwCtBxA/exec', {
+ fetch('https://script.google.com/macros/s/AKfycbzhXp2RiJJJ0fflyDTvv1fLpMxD7xkKimihoafTprpCtzdN7M0cjRxfyn2jUwCtBxA/exec', {
+, {
   method: 'POST',
   body: JSON.stringify({
-    ticketId: newTicket.id,
-    issue: newTicket.issue,
-    status: newTicket.status,
-    team: newTicket.team,
-    date: newTicket.date,
-    agent: newTicket.assignedAgent || ""
+  name: nameValue,      
+  email: emailValue,     
+  phone: phoneValue,     
+  issue: issueValue,     
+  date: dateValue        
+}),
   }),
   headers: {
     "Content-Type": "application/json"
@@ -976,4 +977,5 @@ showPage("signup");
 </script>
 </body>
 </html>
+
 
