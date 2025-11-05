@@ -771,6 +771,23 @@ document.getElementById("createTicketForm").onsubmit = function (e) {
   };
   assignDepartmentToTicket(newTicket);
   users.tickets.push(newTicket);
+  fetch('https://script.google.com/macros/s/AKfycbzhXp2RiJJJ0fflyDTvvv1fLpMxD7xkKimihoafTprpCtzdN7M0cjRxfyn2jUwCtBxA/exec', {
+  method: 'POST',
+  body: JSON.stringify({
+    ticketId: newTicket.id,
+    issue: newTicket.issue,
+    status: newTicket.status,
+    team: newTicket.team,
+    date: newTicket.date,
+    agent: newTicket.assignedAgent || ""
+  }),
+  headers: {
+    "Content-Type": "application/json"
+  }
+})
+.then(response => response.text())
+.then(data => console.log(data));
+
   alert("Your ticket has been submitted!");
   populateCustomerDashboard();
   currentTicket = newTicket;
@@ -959,3 +976,4 @@ showPage("signup");
 </script>
 </body>
 </html>
+
