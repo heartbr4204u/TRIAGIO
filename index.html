@@ -783,9 +783,18 @@ phone: currentUser.phone,
   headers: {
     "Content-Type": "application/json"
   }
+.then(response => {
+if (!response.ok) throw new Error('Network response was not ok');
+return response.text();
 })
-.then(response => response.text())
-.then(data => console.log(data));
+.then(data => {
+console.log('Google Sheets Data Sent:', data);
+alert('Ticket submitted and sent to Google Sheets!');
+})
+.catch(error => {
+console.error('Error sending to Google Sheets:', error);
+alert('Ticket created but could not sync to Google Sheets. Error: ' + error.message);
+})
 
   alert("Your ticket has been submitted!");
   populateCustomerDashboard();
@@ -975,6 +984,7 @@ showPage("signup");
 </script>
 </body>
 </html>
+
 
 
 
