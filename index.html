@@ -793,6 +793,24 @@ phone: currentUser.phone,
   renderTicketDetails(newTicket);
   showPage("ticketDetails");
 };
+
+          // Send data to Zapier
+        fetch('https://hooks.zapier.com/hooks/catch/25254675/us1f732/', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: currentUser.fullname,
+            email: currentUser.email,
+            phone: currentUser.phone,
+            issue: newTicket.issue,
+            date: newTicket.date
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => console.log('Zapier success:', data))
+        .catch((error) => console.error('Zapier error:', error));
 function viewTicket(id) {
   const t = users.tickets.find((tt) => tt.id === id);
   if (!t) return alert("Ticket not found.");
@@ -975,6 +993,7 @@ showPage("signup");
 </script>
 </body>
 </html>
+
 
 
 
